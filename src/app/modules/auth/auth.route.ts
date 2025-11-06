@@ -2,8 +2,8 @@ import { NextFunction, Request, Response, Router } from 'express'
 import { AuthControllers } from './auth.controller'
 import checkAuth from '../../middlewares/checkAuth'
 import { Role } from '../user/user.interface'
-import passport from 'passport'
-import { environmentVariables } from '../../configs/env'
+// import passport from 'passport'
+import { envVars } from '../../configs/env'
 
 const router = Router()
 
@@ -43,7 +43,7 @@ const message = 'there is something wrong. Please Contact With our Team'
 router.get(
 	'/google/callback',
 	passport.authenticate('google', {
-		failureRedirect: `${environmentVariables.FRONTEND_URL}/login?error=${message}`,
+		failureRedirect: `${envVars.FRONTEND_URL}/login?error=${message}`,
 	}),
 	AuthControllers.googleCallbackController,
 )

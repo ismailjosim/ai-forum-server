@@ -68,7 +68,7 @@ const updateUserIntoDB = async (
 	decodedToken: JwtPayload,
 ) => {
 	// Normal user/guide → only update his info
-	if (decodedToken.role === Role.USER || decodedToken.role === Role.GUIDE) {
+	if (decodedToken.role === Role.USER) {
 		if (userId !== decodedToken.userId) {
 			throw new AppError(httpStatus.FORBIDDEN, 'You are not authorized')
 		}

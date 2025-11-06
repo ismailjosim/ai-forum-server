@@ -3,38 +3,48 @@ import { IsActive, Role } from './user.interface'
 
 // Password schema with separate validation rules
 // Note: superRefine method return all error if every error is true
-const passwordSchema = z.string().superRefine((val, ctx) => {
-	if (val.length < 8) {
-		ctx.addIssue({
-			code: z.ZodIssueCode.too_small,
-			type: 'string',
-			minimum: 8,
-			inclusive: true,
-			message: 'Password must be at least 8 characters long',
-		})
-	}
 
-	if (!/[A-Z]/.test(val)) {
-		ctx.addIssue({
-			code: z.ZodIssueCode.custom,
-			message: 'Password must contain at least 1 uppercase letter',
-		})
-	}
+export const passwordSchema = z
+	.string({
+		error: 'Password is required',
+	})
+	.superRefine((val, ctx) => {
+		// if (val.length < 8) {
+		// 	ctx.addIssue({
+		// 		code: z.ZodIssueCode.too_small,
+		// 		minimum: 8,
+		// 		message: 'Password must be at least 8 characters long',
+		// 	})
+		// }
 
-	if (!/[a-z]/.test(val)) {
-		ctx.addIssue({
-			code: z.ZodIssueCode.custom,
-			message: 'Password must contain at least 1 lowercase letter',
-		})
-	}
+		if (!/[A-Z]/.test(val)) {
+			ctx.addIssue({
+				code: z.ZodIssueCode.custom,
+				message: 'Password must contain at least one uppercase letter',
+			})
+		}
 
-	if (!/\d/.test(val)) {
-		ctx.addIssue({
-			code: z.ZodIssueCode.custom,
-			message: 'Password must contain at least 1 digit',
-		})
-	}
-})
+		if (!/[a-z]/.test(val)) {
+			ctx.addIssue({
+				code: z.ZodIssueCode.custom,
+				message: 'Password must contain at least one lowercase letter',
+			})
+		}
+
+		if (!/\d/.test(val)) {
+			ctx.addIssue({
+				code: z.ZodIssueCode.custom,
+				message: 'Password must contain at least one digit',
+			})
+		}
+
+		if (!/[!@#$%^&*(),.?":{}|<>]/.test(val)) {
+			ctx.addIssue({
+				code: z.ZodIssueCode.custom,
+				message: 'Password must contain at least one special character',
+			})
+		}
+	})
 
 // Auth provider validation
 const authProviderSchema = z.object({
@@ -50,7 +60,7 @@ const objectIdSchema = z
 // User creation schema
 const createUserSchemaValidation = z.object({
 	name: z
-		.string({ invalid_type_error: 'Name must be a string value' })
+		.string({ error: 'Name must be a string value' })
 		.min(2, {
 			message: 'Name must be minimum 2 characters',
 		})
@@ -59,14 +69,14 @@ const createUserSchemaValidation = z.object({
 	password: passwordSchema.optional(),
 	email: z.string().email({ message: 'Invalid email address' }),
 	phone: z
-		.string({ invalid_type_error: 'Phone must be a string' })
+		.string({ error: 'Phone must be a string' })
 		.regex(/^(?:\+8801|8801|01)[0-9]{9}$/, {
 			message: 'Phone number must be a valid Bangladeshi number',
 		})
 		.optional(),
 
 	address: z
-		.string({ invalid_type_error: 'Address must be a string' })
+		.string({ error: 'Address must be a string' })
 		.max(255, { message: 'Address is too long' })
 		.optional(),
 })
@@ -80,7 +90,7 @@ const updateUserSchemaValidation = z.object({
 		.optional(),
 
 	phone: z
-		.string({ invalid_type_error: 'Phone must be a string' })
+		.string({ error: 'Phone must be a string' })
 		.regex(/^(?:\+8801|8801|01)[0-9]{9}$/, {
 			message: 'Phone number must be a valid Bangladeshi number',
 		})
