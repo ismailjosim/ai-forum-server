@@ -10,10 +10,9 @@ router.post(
 	validateSchema(ThreadSchemaValidation.create),
 	ThreadController.createThread,
 )
-router.post(
-	'/',
-
-	ThreadController.getAllThreads,
-)
+router.get('/', ThreadController.getAllThreads)
+router.get('/:id', ThreadController.getSingleThread)
+router.patch('/:id', ThreadController.updateSingleThread)
+router.delete('/:id', ThreadController.deleteThreadByID)
 
 export const ThreadRoutes = router

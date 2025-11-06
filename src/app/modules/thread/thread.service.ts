@@ -5,6 +5,9 @@ import { IThread } from './thread.interface'
 import StatusCode from '../../utils/StatusCode'
 import AppError from '../../helpers/AppError'
 import { UserModel } from '../user/user.model'
+import { QueryBuilder } from '../../utils/QueryBuilder'
+import { threadSearchableFields } from './thread.constant'
+import { promise } from 'zod'
 
 /*
  * Create a new thread and handle related updates (like user stats)
@@ -61,11 +64,67 @@ const createThreadIntoDB = async (payload: Partial<IThread>) => {
 	}
 }
 
-const getAllThreadsFromDB = async () => {
-	return null
+const getAllThreadsFromDB = async (query: Record<string, string>) => {
+	const queryBuilder = new QueryBuilder(ThreadModel.find(), query)
+	const threads = queryBuilder
+		.search(threadSearchableFields)
+		.filter()
+		.sort()
+		.fields()
+		.paginate()
+	const [data, meta] = await Promise.all([
+		threads.build(),
+		queryBuilder.getMeta(),
+	])
+	return {
+		data,
+		meta,
+	}
+}
+const getSingleThreadFromDB = async (id: string) => {
+	const result = await ThreadModel.findById(id)
+	return result
+}
+const updateSingleThreadIntoDB = async (
+	id: string,
+	payload: Partial<IThread>,
+) => {
+	// Validate ObjectId
+	if (!mongoose.Types.ObjectId.isValid(id)) {
+		throw new AppError(StatusCode.BAD_REQUEST, 'Invalid Thread ID')
+	}
+
+	const updatedThread = await ThreadModel.findByIdAndUpdate(
+		id,
+		{ $set: payload },
+		{ new: true, runValidators: true },
+	)
+
+	if (!updatedThread) {
+		throw new AppError(StatusCode.NOT_FOUND, 'Thread not found')
+	}
+
+	return updatedThread
+}
+export const deleteThreadByIDFromDB = async (id: string) => {
+	// Validate ObjectId
+	if (!mongoose.Types.ObjectId.isValid(id)) {
+		throw new AppError(StatusCode.BAD_REQUEST, 'Invalid Thread ID')
+	}
+
+	const deletedThread = await ThreadModel.findByIdAndDelete(id)
+
+	if (!deletedThread) {
+		throw new AppError(StatusCode.NOT_FOUND, 'Thread not found')
+	}
+
+	return deletedThread
 }
 
 export const ThreadServices = {
 	createThreadIntoDB,
 	getAllThreadsFromDB,
+	getSingleThreadFromDB,
+	updateSingleThreadIntoDB,
+	deleteThreadByIDFromDB,
 }

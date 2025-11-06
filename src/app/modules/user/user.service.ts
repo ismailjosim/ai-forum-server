@@ -113,7 +113,7 @@ const updateUserIntoDB = async (
 
 	// role update only for Admin/Super Admin
 	if (payload.role) {
-		if (decodedToken.role === Role.USER || decodedToken.role === Role.GUIDE) {
+		if (decodedToken.role === Role.USER) {
 			throw new AppError(
 				httpStatus.FORBIDDEN,
 				'You are not authorized to update role',
@@ -123,7 +123,7 @@ const updateUserIntoDB = async (
 
 	// sensitive flags update protection
 	if (payload.isActive || payload.isDeleted || payload.isVerified) {
-		if (decodedToken.role === Role.USER || decodedToken.role === Role.GUIDE) {
+		if (decodedToken.role === Role.USER) {
 			throw new AppError(
 				httpStatus.FORBIDDEN,
 				'You are not authorized to update system fields',
