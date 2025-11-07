@@ -10,4 +10,12 @@ const passwordHashing = async (password: string) => {
 	return hashedPassword
 }
 
-export default passwordHashing
+const checkingPassword = async (password: string, storedPassword: string) => {
+	const isCorrectPass = await bcrypt.compare(password, storedPassword)
+	return isCorrectPass
+}
+
+export const passwordManage = {
+	passwordHashing,
+	checkingPassword,
+}

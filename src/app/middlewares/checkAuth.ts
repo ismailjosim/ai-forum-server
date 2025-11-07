@@ -44,9 +44,9 @@ const checkAuth =
 				throw new AppError(httpStatus.BAD_REQUEST, 'user is removed')
 			}
 
-			if (!isUserExist.isVerified) {
-				throw new AppError(httpStatus.BAD_REQUEST, 'user is not verified')
-			}
+			// if (!isUserExist.isVerified) {
+			// 	throw new AppError(httpStatus.BAD_REQUEST, 'user is not verified')
+			// }
 
 			if (!authRoles.includes(tokenVerification.role)) {
 				throw new AppError(httpStatus.FORBIDDEN, 'Access Denied')

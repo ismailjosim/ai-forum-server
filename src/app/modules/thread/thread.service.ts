@@ -7,7 +7,6 @@ import AppError from '../../helpers/AppError'
 import { UserModel } from '../user/user.model'
 import { QueryBuilder } from '../../utils/QueryBuilder'
 import { threadSearchableFields } from './thread.constant'
-import { promise } from 'zod'
 
 /*
  * Create a new thread and handle related updates (like user stats)

@@ -1,12 +1,13 @@
 import httpStatus from 'http-status-codes'
 import { IAuthProvider, IUser, Role } from './user.interface'
 import { UserModel } from './user.model'
-import passwordHashing from '../../utils/passwordHashing'
+
 import { JwtPayload } from 'jsonwebtoken'
 import { QueryBuilder } from '../../utils/QueryBuilder'
 import { userSearchableFields } from './user.constant'
 import AppError from '../../helpers/AppError'
 import { envVars } from '../../configs/env'
+import { passwordManage } from '../../utils/passwordHashing'
 
 const createUserIntoDB = async (payload: Partial<IUser>) => {
 	const { email, password, ...rest } = payload
@@ -16,7 +17,9 @@ const createUserIntoDB = async (payload: Partial<IUser>) => {
 		throw new AppError(httpStatus.BAD_REQUEST, 'This user is already exist.')
 	}
 
-	const hashedPassword = await passwordHashing(password as string)
+	const hashedPassword = await passwordManage.passwordHashing(
+		password as string,
+	)
 
 	const authProvider: IAuthProvider = {
 		provider: 'credentials',
