@@ -1,7 +1,7 @@
+import { passwordManage } from './passwordHashing'
 import { envVars } from '../configs/env'
 import { IAuthProvider, Role } from '../modules/user/user.interface'
 import { UserModel } from '../modules/user/user.model'
-import passwordHashing from './passwordHashing'
 
 const seedSuperAdmin = async () => {
 	try {
@@ -16,7 +16,7 @@ const seedSuperAdmin = async () => {
 			return
 		}
 
-		const hashedPassword = await passwordHashing(
+		const hashedPassword = await passwordManage.passwordHashing(
 			envVars.SUPER_ADMIN_PASS as string,
 		)
 
