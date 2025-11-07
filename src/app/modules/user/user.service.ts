@@ -180,9 +180,9 @@ const updateUserProfilePictureIntoDB = async (
 	)
 
 	// Delete old profile picture from cloudinary (if exists)
-	if (picture && isUserExist.picture) {
-		// await deleteImageFromCloudinary(isUserExist.picture)
-	}
+	// if (picture && isUserExist.picture) {
+	// 	 await deleteImageFromCloudinary(isUserExist.picture)
+	// }
 
 	return updatedUser
 }
