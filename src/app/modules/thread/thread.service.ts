@@ -83,10 +83,35 @@ const getAllThreadsFromDB = async (query: Record<string, string>) => {
 }
 const getSingleThreadFromDB = async (id: string) => {
 	// Fetch the thread
-	const thread = await ThreadModel.findById(id)
+	const threadFieldLimit = {
+		_id: 1,
+		title: 1,
+		content: 1,
+		category: 1,
+		author: 1,
+		tags: 1,
+		views: 1,
+		createdAt: 1,
+		updatedAt: 1,
+	}
+	const postFieldLimit = {
+		_id: 1,
+		content: 1,
+		author: 1,
+		thread: 1,
+		parentPost: 1,
+		likes: 1,
+		likesCount: 1,
+		createdAt: 1,
+		updatedAt: 1,
+	}
+
+	const thread = await ThreadModel.findById(id).select(threadFieldLimit)
 
 	// Fetch all posts for this thread
-	const matchedPosts = await PostModel.find({ thread: id }).lean()
+	const matchedPosts = await PostModel.find({ thread: id })
+		.select(postFieldLimit)
+		.lean()
 
 	// Map to store posts by their ID
 	const postMap = new Map<string, any>()
@@ -112,8 +137,9 @@ const getSingleThreadFromDB = async (id: string) => {
 			nestedPosts.push(post)
 		}
 	})
-
-	return { thread, threadPost: nestedPosts }
+	const data = { thread, threadPost: nestedPosts }
+	console.log(data)
+	return data
 }
 
 const updateSingleThreadIntoDB = async (
@@ -137,6 +163,7 @@ const updateSingleThreadIntoDB = async (
 
 	return updatedThread
 }
+
 export const deleteThreadByIDFromDB = async (id: string) => {
 	// Validate ObjectId
 	if (!mongoose.Types.ObjectId.isValid(id)) {
