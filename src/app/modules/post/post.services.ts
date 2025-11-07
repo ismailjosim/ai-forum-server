@@ -12,17 +12,17 @@ const createPostIntoDB = async (payload: Partial<IPost>) => {
 
 const getAllPostsFromDB = async () => {
 	const posts = await PostModel.find()
-		.populate('author', 'name email')
-		.populate('thread')
+	// .populate('author', 'name email')
+	// .populate('thread')
 	return posts
 }
 
 const getSinglePostFromDB = async (id: string) => {
 	if (!Types.ObjectId.isValid(id)) throw new Error('Invalid post ID')
 	const post = await PostModel.findById(id)
-		.populate('author', 'name email')
-		.populate('thread')
-		.populate('parentPost')
+	// .populate('author', 'name email')
+	// .populate('thread')
+	// .populate('parentPost')
 	return post
 }
 

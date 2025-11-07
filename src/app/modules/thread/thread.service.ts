@@ -7,6 +7,7 @@ import AppError from '../../helpers/AppError'
 import { UserModel } from '../user/user.model'
 import { QueryBuilder } from '../../utils/QueryBuilder'
 import { threadSearchableFields } from './thread.constant'
+import { PostModel } from '../post/post.model'
 
 /*
  * Create a new thread and handle related updates (like user stats)
@@ -81,9 +82,40 @@ const getAllThreadsFromDB = async (query: Record<string, string>) => {
 	}
 }
 const getSingleThreadFromDB = async (id: string) => {
-	const result = await ThreadModel.findById(id)
-	return result
+	// Fetch the thread
+	const thread = await ThreadModel.findById(id)
+
+	// Fetch all posts for this thread
+	const matchedPosts = await PostModel.find({ thread: id }).lean()
+
+	// Map to store posts by their ID
+	const postMap = new Map<string, any>()
+
+	// Initialize all posts in the map
+	matchedPosts.forEach((post) => {
+		;(post as any).replies = []
+		postMap.set(post._id.toString(), post)
+	})
+
+	// Array to hold top-level posts
+	const nestedPosts: any[] = []
+
+	// Build the nested structure
+	matchedPosts.forEach((post) => {
+		if (post.parentPost) {
+			const parent = postMap.get(post.parentPost.toString())
+			if (parent) {
+				parent.replies.push(post)
+			}
+		} else {
+			// Top-level post
+			nestedPosts.push(post)
+		}
+	})
+
+	return { thread, threadPost: nestedPosts }
 }
+
 const updateSingleThreadIntoDB = async (
 	id: string,
 	payload: Partial<IThread>,
