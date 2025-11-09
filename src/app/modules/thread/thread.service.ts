@@ -106,10 +106,19 @@ const getSingleThreadFromDB = async (id: string) => {
 		updatedAt: 1,
 	}
 
-	const thread = await ThreadModel.findById(id).select(threadFieldLimit)
+	const thread = await ThreadModel.findById(id)
+		.populate({
+			path: 'author',
+			select: '_id picture name role isVerified',
+		})
+		.select(threadFieldLimit)
 
 	// Fetch all posts for this thread
 	const matchedPosts = await PostModel.find({ thread: id })
+		.populate({
+			path: 'author',
+			select: '_id picture name role isVerified',
+		})
 		.select(postFieldLimit)
 		.lean()
 
@@ -138,7 +147,7 @@ const getSingleThreadFromDB = async (id: string) => {
 		}
 	})
 	const data = { thread, threadPost: nestedPosts }
-	console.log(data)
+	// console.log(data)
 	return data
 }
 

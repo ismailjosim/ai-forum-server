@@ -1,3 +1,4 @@
+import { getIO } from '../../configs/socket.config'
 import { IPost } from './post.interface'
 import { PostModel } from './post.model'
 import { Types } from 'mongoose'
@@ -7,6 +8,27 @@ const createPostIntoDB = async (payload: Partial<IPost>) => {
 	if (!payload.depth) payload.depth = payload.parentPost ? 1 : 0
 
 	const post = await PostModel.create(payload)
+
+	// Populate the author field before emitting
+	await post.populate('author', 'name picture isVerified role')
+
+	// emit socket event for new post
+	try {
+		const io = getIO()
+
+		// Emit to the thread room (not parent post room)
+		// This way all users viewing the thread get the update
+		io.to(`post-${post.thread}`).emit('new-comment', {
+			postId: post.thread,
+			comment: post,
+		})
+
+		console.log(`📤 Emitted new-comment to post-${post.thread}`)
+	} catch (error) {
+		// Socket not initialized yet or error - continue without real-time
+		console.log('Socket emit failed:', error)
+	}
+
 	return post
 }
 
