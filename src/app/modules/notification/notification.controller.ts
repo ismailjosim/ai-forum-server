@@ -7,7 +7,7 @@ import { NotificationServices } from './notification.service'
 // Get user notifications
 const getUserNotifications = catchAsync(
 	async (req: Request, res: Response, next: NextFunction) => {
-		const userId = req.user?.id
+		const userId = req.user?.userId
 		const skip = parseInt(req.query.skip as string) || 0
 		const limit = parseInt(req.query.limit as string) || 20
 		const unreadOnly = req.query.unreadOnly === 'true'
@@ -31,7 +31,7 @@ const getUserNotifications = catchAsync(
 // Get unread count
 const getUnreadCount = catchAsync(
 	async (req: Request, res: Response, next: NextFunction) => {
-		const userId = req.user?.id
+		const userId = req.user?.userId
 
 		const count = await NotificationServices.getUnreadCount(userId)
 
@@ -47,7 +47,7 @@ const getUnreadCount = catchAsync(
 // Mark notifications as read
 const markAsRead = catchAsync(
 	async (req: Request, res: Response, next: NextFunction) => {
-		const userId = req.user?.id
+		const userId = req.user?.userId
 		const { notificationIds } = req.body
 
 		if (!Array.isArray(notificationIds)) {
@@ -73,7 +73,7 @@ const markAsRead = catchAsync(
 // Mark all as read
 const markAllAsRead = catchAsync(
 	async (req: Request, res: Response, next: NextFunction) => {
-		const userId = req.user?.id
+		const userId = req.user?.userId
 
 		await NotificationServices.markAllAsRead(userId)
 
@@ -86,10 +86,9 @@ const markAllAsRead = catchAsync(
 	},
 )
 
-// Delete notification
 const deleteNotification = catchAsync(
 	async (req: Request, res: Response, next: NextFunction) => {
-		const userId = req.user?.id
+		const userId = req.user?.userId
 		const notificationId = req.params.id
 
 		await NotificationServices.deleteNotification(userId, notificationId)
