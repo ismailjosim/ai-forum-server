@@ -3,6 +3,7 @@ import { UserRoutes } from '../app/modules/user/user.route'
 import { ThreadRoutes } from '../app/modules/thread/thread.routes'
 import { PostRoutes } from '../app/modules/post/post.route'
 import { AuthRoutes } from '../app/modules/auth/auth.route'
+import { NotificationRoutes } from '../app/modules/notification/notification.routes'
 
 export const router = Router()
 const moduleRoutes = [
@@ -21,6 +22,10 @@ const moduleRoutes = [
 	{
 		path: '/post',
 		route: PostRoutes,
+	},
+	{
+		path: '/notification',
+		route: NotificationRoutes,
 	},
 ]
 

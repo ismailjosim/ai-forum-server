@@ -16,7 +16,6 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
 
-// IMPORTANT: Initialize CORS before Socket.IO
 app.use(
 	cors({
 		origin: envVars.FRONTEND_URL,
@@ -24,7 +23,6 @@ app.use(
 	}),
 )
 
-// Initialize Socket.IO AFTER creating the server
 initializeSocket(server)
 
 //* Application Routes
@@ -44,5 +42,4 @@ app.use(globalErrorHandler)
 // not found route
 app.use(notFound)
 
-// Export the HTTP server (with Socket.IO attached), not just the Express app
 export default server

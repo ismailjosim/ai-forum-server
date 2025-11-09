@@ -77,10 +77,27 @@ const deletePost = catchAsync(
 	},
 )
 
+const likePost = catchAsync(
+	async (req: Request, res: Response, next: NextFunction) => {
+		const postId = req.params.id
+		const userId = req.user?.id
+
+		const result = await PostServices.likePost(postId, userId)
+
+		sendResponse(res, {
+			success: true,
+			statusCode: StatusCode.OK,
+			message: `Post ${result.action} successfully`,
+			data: result,
+		})
+	},
+)
+
 export const PostController = {
 	createPost,
 	getAllPosts,
 	getSinglePost,
 	updatePost,
 	deletePost,
+	likePost,
 }
