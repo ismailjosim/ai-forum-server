@@ -7,14 +7,19 @@ let io: SocketIOServer | null = null
 export const initializeSocket = (server: HTTPServer) => {
 	io = new SocketIOServer(server, {
 		cors: {
-			origin:
-				envVars.NODE_ENV === 'production'
-					? [
-							envVars.FRONTEND_URL || '',
-							'https://ai-forum-client.vercel.app',
-							/https:\/\/.*\.vercel\.app$/,
-					  ]
-					: ['http://localhost:3000'],
+			origin: (origin, callback) => {
+				// Allow all Vercel domains and localhost
+				if (
+					!origin ||
+					origin.includes('vercel.app') ||
+					origin.includes('localhost') ||
+					origin === envVars.FRONTEND_URL
+				) {
+					callback(null, true)
+				} else {
+					callback(new Error('Not allowed by CORS'))
+				}
+			},
 			methods: ['GET', 'POST'],
 			credentials: true,
 			allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
@@ -26,7 +31,7 @@ export const initializeSocket = (server: HTTPServer) => {
 	})
 
 	io.on('connection', (socket) => {
-		console.log('User connected:', socket.id)
+		console.log('✅ User connected:', socket.id)
 
 		// Join a specific post room
 		socket.on('join-post', (postId: string) => {
@@ -41,10 +46,11 @@ export const initializeSocket = (server: HTTPServer) => {
 		})
 
 		socket.on('disconnect', () => {
-			console.log('User disconnected:', socket.id)
+			console.log('❌ User disconnected:', socket.id)
 		})
 	})
 
+	console.log('🔌 Socket.IO initialized')
 	return io
 }
 

@@ -1,4 +1,4 @@
-import express, { Application, Response } from 'express'
+import express, { Application, Response, Request, NextFunction } from 'express'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import http from 'http'
@@ -16,17 +16,55 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
 
-// CORS Configuration
+// CRITICAL: Manual CORS headers BEFORE cors middleware
+app.use((req: Request, res: Response, next: NextFunction) => {
+	const origin = req.headers.origin
+
+	// Allow all Vercel domains and localhost
+	if (
+		origin &&
+		(origin.includes('vercel.app') ||
+			origin.includes('localhost') ||
+			origin === envVars.FRONTEND_URL)
+	) {
+		res.setHeader('Access-Control-Allow-Origin', origin)
+		res.setHeader('Access-Control-Allow-Credentials', 'true')
+		res.setHeader(
+			'Access-Control-Allow-Methods',
+			'GET,POST,PUT,DELETE,PATCH,OPTIONS',
+		)
+		res.setHeader(
+			'Access-Control-Allow-Headers',
+			'Content-Type,Authorization,Cookie',
+		)
+	}
+
+	// Handle preflight
+	if (req.method === 'OPTIONS') {
+		return res.sendStatus(200)
+	}
+
+	next()
+})
+
+// Additional CORS middleware
 app.use(
 	cors({
-		origin:
-			envVars.NODE_ENV === 'production'
-				? [
-						envVars.FRONTEND_URL,
-						'https://ai-forum-client.vercel.app',
-						/https:\/\/.*\.vercel\.app$/,
-				  ]
-				: ['http://localhost:3000'],
+		origin: (origin, callback) => {
+			// Allow requests with no origin (like mobile apps or curl)
+			if (!origin) return callback(null, true)
+
+			// Allow all Vercel domains
+			if (
+				origin.includes('vercel.app') ||
+				origin.includes('localhost') ||
+				origin === envVars.FRONTEND_URL
+			) {
+				callback(null, true)
+			} else {
+				callback(new Error('Not allowed by CORS'))
+			}
+		},
 		credentials: true,
 		methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
 		allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
@@ -35,7 +73,7 @@ app.use(
 
 initializeSocket(server)
 
-//* Health Check Route (Important for Render)
+//* Health Check Route
 app.get('/health', async (_, res: Response) => {
 	res.status(200).json({
 		success: true,
