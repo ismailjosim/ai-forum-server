@@ -18,12 +18,25 @@ app.use(cookieParser())
 
 app.use(
 	cors({
-		origin: envVars.FRONTEND_URL,
+		origin:
+			envVars.NODE_ENV === 'production'
+				? [envVars.FRONTEND_URL, /https:\/\/.*\.vercel\.app$/]
+				: ['http://localhost:3000'],
 		credentials: true,
 	}),
 )
 
 initializeSocket(server)
+
+//* Health Check Route (Important for Render)
+app.get('/health', async (_, res: Response) => {
+	res.status(200).json({
+		success: true,
+		message: 'Server is healthy',
+		timestamp: new Date().toISOString(),
+		uptime: process.uptime(),
+	})
+})
 
 //* Application Routes
 app.use('/api/v1', router)

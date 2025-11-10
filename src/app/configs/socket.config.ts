@@ -1,15 +1,22 @@
 import { Server as HTTPServer } from 'http'
 import { Server as SocketIOServer } from 'socket.io'
+import { envVars } from './env'
 
 let io: SocketIOServer | null = null
 
 export const initializeSocket = (server: HTTPServer) => {
 	io = new SocketIOServer(server, {
 		cors: {
-			origin: process.env.CLIENT_URL || 'http://localhost:3000',
+			origin:
+				envVars.NODE_ENV === 'production'
+					? [envVars.FRONTEND_URL || '', /https:\/\/.*\.vercel\.app$/]
+					: ['http://localhost:3000'],
 			methods: ['GET', 'POST'],
 			credentials: true,
 		},
+		transports: ['websocket', 'polling'],
+		pingTimeout: 60000,
+		pingInterval: 25000,
 	})
 
 	io.on('connection', (socket) => {
