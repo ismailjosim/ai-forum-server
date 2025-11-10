@@ -16,13 +16,20 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
 
+// CORS Configuration
 app.use(
 	cors({
 		origin:
 			envVars.NODE_ENV === 'production'
-				? [envVars.FRONTEND_URL, /https:\/\/.*\.vercel\.app$/]
+				? [
+						envVars.FRONTEND_URL,
+						'https://ai-forum-client.vercel.app',
+						/https:\/\/.*\.vercel\.app$/,
+				  ]
 				: ['http://localhost:3000'],
 		credentials: true,
+		methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+		allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
 	}),
 )
 

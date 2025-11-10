@@ -9,14 +9,20 @@ export const initializeSocket = (server: HTTPServer) => {
 		cors: {
 			origin:
 				envVars.NODE_ENV === 'production'
-					? [envVars.FRONTEND_URL || '', /https:\/\/.*\.vercel\.app$/]
+					? [
+							envVars.FRONTEND_URL || '',
+							'https://ai-forum-client.vercel.app',
+							/https:\/\/.*\.vercel\.app$/,
+					  ]
 					: ['http://localhost:3000'],
 			methods: ['GET', 'POST'],
 			credentials: true,
+			allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
 		},
 		transports: ['websocket', 'polling'],
 		pingTimeout: 60000,
 		pingInterval: 25000,
+		allowEIO3: true,
 	})
 
 	io.on('connection', (socket) => {
