@@ -8,6 +8,7 @@ import { UserModel } from '../user/user.model'
 import { QueryBuilder } from '../../utils/QueryBuilder'
 import { threadSearchableFields } from './thread.constant'
 import { PostModel } from '../post/post.model'
+import { JwtPayload } from 'jsonwebtoken'
 
 /*
  * Create a new thread and handle related updates (like user stats)
@@ -81,6 +82,41 @@ const getAllThreadsFromDB = async (query: Record<string, string>) => {
 		meta,
 	}
 }
+
+const getAllMyThreadsFromDB = async (
+	query: Record<string, string>,
+	user: JwtPayload,
+) => {
+	// ✅ Ensure user.userId is a valid ObjectId
+	if (!mongoose.isValidObjectId(user.userId)) {
+		throw new Error('Invalid userId: not a valid MongoDB ObjectId')
+	}
+
+	const authorId = new mongoose.Types.ObjectId(user.userId)
+
+	const queryBuilder = new QueryBuilder(
+		ThreadModel.find({ author: authorId }),
+		query,
+	)
+
+	const threads = queryBuilder
+		.search(threadSearchableFields)
+		.filter()
+		.sort()
+		.fields()
+		.paginate()
+
+	const [data, meta] = await Promise.all([
+		threads.build(),
+		queryBuilder.getMeta(),
+	])
+
+	return {
+		data,
+		meta,
+	}
+}
+
 const getSingleThreadFromDB = async (id: string) => {
 	// Fetch the thread
 	const threadFieldLimit = {
@@ -191,6 +227,7 @@ export const deleteThreadByIDFromDB = async (id: string) => {
 export const ThreadServices = {
 	createThreadIntoDB,
 	getAllThreadsFromDB,
+	getAllMyThreadsFromDB,
 	getSingleThreadFromDB,
 	updateSingleThreadIntoDB,
 	deleteThreadByIDFromDB,

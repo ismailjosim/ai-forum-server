@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from 'express'
 import sendResponse from '../../utils/sendResponse'
 import { ThreadServices } from './thread.service'
 import StatusCode from '../../utils/StatusCode'
+import { JwtPayload } from 'jsonwebtoken'
 const createThread = catchAsync(
 	async (req: Request, res: Response, next: NextFunction) => {
 		const result = await ThreadServices.createThreadIntoDB(req.body)
@@ -23,6 +24,21 @@ const getAllThreads = catchAsync(
 			success: true,
 			statusCode: StatusCode.OK,
 			message: 'All Threads Retrieved successfully',
+			data: result.data,
+			meta: result.meta,
+		})
+	},
+)
+const getAllMyThreads = catchAsync(
+	async (req: Request, res: Response, next: NextFunction) => {
+		const result = await ThreadServices.getAllMyThreadsFromDB(
+			req.query as Record<string, string>,
+			req.user as JwtPayload,
+		)
+		sendResponse(res, {
+			success: true,
+			statusCode: StatusCode.OK,
+			message: 'All User Threads Retrieved successfully',
 			data: result.data,
 			meta: result.meta,
 		})
@@ -77,6 +93,7 @@ const deleteThreadByID = catchAsync(
 export const ThreadController = {
 	createThread,
 	getAllThreads,
+	getAllMyThreads,
 	getSingleThread,
 	updateSingleThread,
 	deleteThreadByID,
