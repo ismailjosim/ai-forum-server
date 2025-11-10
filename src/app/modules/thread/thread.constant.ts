@@ -1,1 +1,1 @@
-export const threadSearchableFields = []
+export const threadSearchableFields = ['title', 'content']
